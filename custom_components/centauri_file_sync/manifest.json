@@ -1,11 +1,11 @@
 {
   "domain": "centauri_file_sync",
   "name": "Centauri File Sync",
-  "version": "0.2.0",
-  "config_flow": true,
-  "iot_class": "local_polling",
-  "documentation": "https://github.com/scampiuk/centauri-file-sync",
-  "issue_tracker": "https://github.com/scampiuk/centauri-file-sync/issues",
   "codeowners": ["@scampiuk"],
-  "dependencies": ["frontend", "http", "panel_custom"]
+  "config_flow": true,
+  "dependencies": ["frontend", "http", "panel_custom"],
+  "documentation": "https://github.com/scampiuk/centauri-file-sync",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/scampiuk/centauri-file-sync/issues",
+  "version": "0.2.0"
 }
