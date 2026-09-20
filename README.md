@@ -65,9 +65,10 @@ Restart Home Assistant, then add **Print Orbit** from **Settings → Devices & s
 Version 0.4 changes the Home Assistant domain from `centauri_file_sync` to `print_orbit`, so Home Assistant treats it as a new integration.
 
 1. Remove the **Centauri File Sync** config entry from **Settings → Devices & services**.
-2. Update the HACS repository to version 0.4 and remove `/config/custom_components/centauri_file_sync` if HACS leaves the old directory behind.
-3. Restart Home Assistant.
-4. Add **Print Orbit** from **Settings → Devices & services**.
+2. In HACS, remove the existing Centauri File Sync repository entry. HACS retains the old integration domain in its local repository record, so an in-place update can otherwise target `/config/custom_components/centauri_file_sync`.
+3. Remove `/config/custom_components/centauri_file_sync` if it remains, then add `https://github.com/scampiuk/print_orbit` again as an **Integration** custom repository and install version 0.4.0. Confirm the target path is `/config/custom_components/print_orbit`.
+4. Restart Home Assistant.
+5. Add **Print Orbit** from **Settings → Devices & services**.
 
 On first setup, Print Orbit moves saved printer configuration and staged G-code from the old storage location. Existing files in the new location take precedence. The legacy printer store and any emptied legacy staging directories are removed after migration.
 
