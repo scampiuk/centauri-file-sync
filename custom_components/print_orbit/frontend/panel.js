@@ -1,4 +1,4 @@
-class CentauriFileSyncPanel extends HTMLElement {
+class PrintOrbitPanel extends HTMLElement {
   constructor() {
     super();
     this._hass = null;
@@ -26,7 +26,7 @@ class CentauriFileSyncPanel extends HTMLElement {
   _render() {
     this.innerHTML = `
       <style>
-        centauri-file-sync-panel {
+        print-orbit-panel {
           display:block;
           min-height:100%;
           background:var(--primary-background-color);
@@ -124,10 +124,10 @@ class CentauriFileSyncPanel extends HTMLElement {
       <div class="cfs-wrap">
         <div class="cfs-top">
           <div class="cfs-heading">
-            <div class="cfs-heading-icon"><ha-icon icon="mdi:printer-3d"></ha-icon></div>
-            <div><h1 class="cfs-title">Centauri File Sync</h1><div class="cfs-sub">Stage G-code once, then send it to every selected printer.</div></div>
+            <div class="cfs-heading-icon"><ha-icon icon="mdi:orbit"></ha-icon></div>
+            <div><h1 class="cfs-title">Print Orbit</h1><div class="cfs-sub">Manage and distribute G-code across your connected printers.</div></div>
           </div>
-          <span class="cfs-badge">v0.3.0 · upload only</span>
+          <span class="cfs-badge">v0.4.0 · Centauri adapter</span>
         </div>
 
         <div class="cfs-grid">
@@ -243,7 +243,7 @@ class CentauriFileSyncPanel extends HTMLElement {
 
   async _api(method, path, body) {
     try {
-      return await this._hass.callApi(method, `centauri_file_sync/${path}`, body);
+      return await this._hass.callApi(method, `print_orbit/${path}`, body);
     } catch (error) {
       throw new Error(this._errorMessage(error));
     }
@@ -256,7 +256,7 @@ class CentauriFileSyncPanel extends HTMLElement {
       offset: String(offset),
       total: String(file.size),
     });
-    const response = await this._hass.fetchWithAuth(`/api/centauri_file_sync/files/chunk?${query.toString()}`, {
+    const response = await this._hass.fetchWithAuth(`/api/print_orbit/files/chunk?${query.toString()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/octet-stream' },
       body: chunk,
@@ -484,6 +484,6 @@ class CentauriFileSyncPanel extends HTMLElement {
   }
 }
 
-if (!customElements.get('centauri-file-sync-panel')) {
-  customElements.define('centauri-file-sync-panel', CentauriFileSyncPanel);
+if (!customElements.get('print-orbit-panel')) {
+  customElements.define('print-orbit-panel', PrintOrbitPanel);
 }

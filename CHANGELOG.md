@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+- Rebrand the product as printer-agnostic **Print Orbit**, with a new orbit/printer HACS icon.
+- Change the Home Assistant domain and package from `centauri_file_sync` to `print_orbit`.
+- Move legacy printer settings and staged G-code into the new domain on first setup and remove the migrated legacy data.
+- Document the migration steps and the roadmap for remote file management, camera monitoring, scheduling and additional printer adapters.
+- Keep Elegoo Centauri CC1 and CC2 as the initial device adapter while making the product language printer-neutral.
+
 ## 0.3.0
 
 - Redesign the sidebar panel around Home Assistant cards, buttons, alerts, icons, theme tokens, spacing, and responsive layout conventions.

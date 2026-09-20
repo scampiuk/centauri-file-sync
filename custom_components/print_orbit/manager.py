@@ -1,4 +1,4 @@
-"""State and upload manager for Centauri File Sync."""
+"""State and upload manager for Print Orbit."""
 from __future__ import annotations
 
 import asyncio
@@ -15,6 +15,8 @@ from homeassistant.helpers.storage import Store
 from .const import (
     ALLOWED_SUFFIXES,
     DOMAIN,
+    LEGACY_DOMAIN,
+    LEGACY_STORAGE_KEY,
     MAX_FILES_PER_BATCH,
     MAX_PRINTERS_PER_JOB,
     STORAGE_KEY,
@@ -70,12 +72,13 @@ def normalise_printer(data: dict[str, Any], *, include_id: bool) -> dict[str, An
     return result
 
 
-class CentauriFileSyncManager:
+class PrintOrbitManager:
     """Manage configured printers, staged files, and copy jobs."""
 
     def __init__(self, hass: HomeAssistant) -> None:
         self.hass = hass
         self.files_dir = Path(hass.config.path(DOMAIN, "files"))
+        self.legacy_files_dir = Path(hass.config.path(LEGACY_DOMAIN, "files"))
         self.store: Store[list[dict[str, Any]]] = Store(
             hass, STORAGE_VERSION, STORAGE_KEY
         )
@@ -89,8 +92,18 @@ class CentauriFileSyncManager:
         await self.hass.async_add_executor_job(
             lambda: self.files_dir.mkdir(parents=True, exist_ok=True)
         )
+        await self.hass.async_add_executor_job(self._migrate_legacy_files_sync)
         await self.hass.async_add_executor_job(self._cleanup_stale_uploads_sync)
-        stored = await self.store.async_load() or []
+        stored = await self.store.async_load()
+        if stored is None:
+            legacy_store: Store[list[dict[str, Any]]] = Store(
+                self.hass, STORAGE_VERSION, LEGACY_STORAGE_KEY
+            )
+            stored = await legacy_store.async_load()
+            if stored:
+                await self.store.async_save(stored)
+                await legacy_store.async_remove()
+        stored = stored or []
         printers: list[dict[str, Any]] = []
         for item in stored:
             try:
@@ -98,6 +111,24 @@ class CentauriFileSyncManager:
             except ValueError:
                 continue
         self.printers = printers
+
+    def _migrate_legacy_files_sync(self) -> None:
+        """Move legacy staged files into the Print Orbit domain."""
+        if not self.legacy_files_dir.is_dir():
+            return
+        for source in self.legacy_files_dir.iterdir():
+            if not source.is_file() or source.suffix.lower() not in ALLOWED_SUFFIXES:
+                continue
+            target = self.files_dir / source.name
+            if target.exists():
+                source.unlink()
+            else:
+                source.replace(target)
+        try:
+            self.legacy_files_dir.rmdir()
+            self.legacy_files_dir.parent.rmdir()
+        except OSError:
+            pass
 
     def _cleanup_stale_uploads_sync(self) -> None:
         """Remove interrupted browser staging files older than one day."""

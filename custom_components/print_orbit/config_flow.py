@@ -1,4 +1,4 @@
-"""Config flow for Centauri File Sync."""
+"""Config flow for Print Orbit."""
 from __future__ import annotations
 
 from typing import Any
@@ -10,7 +10,7 @@ from homeassistant import config_entries
 from .const import DOMAIN, NAME
 
 
-class CentauriFileSyncConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class PrintOrbitConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle the one-instance setup flow."""
 
     VERSION = 1

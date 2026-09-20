@@ -2,7 +2,7 @@
 import importlib.util
 from pathlib import Path
 
-ROOT = Path(__file__).parents[1] / "custom_components" / "centauri_file_sync"
+ROOT = Path(__file__).parents[1] / "custom_components" / "print_orbit"
 
 
 def _load_manager_module():
@@ -18,3 +18,10 @@ def test_manager_exists():
 
 def test_manifest_exists():
     assert (ROOT / "manifest.json").is_file()
+
+
+def test_domain_migration_is_present():
+    source = (ROOT / "manager.py").read_text()
+    assert "LEGACY_STORAGE_KEY" in source
+    assert "legacy_store.async_remove()" in source
+    assert "source.replace(target)" in source

@@ -1,0 +1,14 @@
+{
+  "title": "Print Orbit",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Print Orbit",
+        "description": "Adds a Print Orbit panel to the Home Assistant sidebar. Printer addresses and G-code files are managed from that panel."
+      }
+    },
+    "abort": {
+      "already_configured": "Print Orbit is already configured."
+    }
+  }
+}

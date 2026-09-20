@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Version to publish, without the leading v (for example 0.3.1)
+        description: Version to publish, without the leading v (for example 0.4.1)
         required: true
         type: string
 
@@ -26,23 +26,23 @@ jobs:
           RELEASE_VERSION: ${{ inputs.version }}
         run: |
           if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Version must use stable semantic versioning, for example 0.3.1."
+            echo "Version must use stable semantic versioning, for example 0.4.1."
             exit 1
           fi
 
-          manifest_version=$(node -p "require('./custom_components/centauri_file_sync/manifest.json').version")
+          manifest_version=$(node -p "require('./custom_components/print_orbit/manifest.json').version")
           if [[ "$manifest_version" != "$RELEASE_VERSION" ]]; then
             echo "manifest.json contains $manifest_version, expected $RELEASE_VERSION."
             exit 1
           fi
 
-          grep -Fq "VERSION = \"$RELEASE_VERSION\"" custom_components/centauri_file_sync/const.py
-          grep -Fq "v$RELEASE_VERSION · upload only" custom_components/centauri_file_sync/frontend/panel.js
+          grep -Fq "VERSION = \"$RELEASE_VERSION\"" custom_components/print_orbit/const.py
+          grep -Fq "v$RELEASE_VERSION · Centauri adapter" custom_components/print_orbit/frontend/panel.js
           grep -Fq "## $RELEASE_VERSION" CHANGELOG.md
 
       - name: Validate panel JavaScript
         run: |
-          node --check custom_components/centauri_file_sync/frontend/panel.js
+          node --check custom_components/print_orbit/frontend/panel.js
           node tests/test_frontend.js
 
   hacs:

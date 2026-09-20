@@ -1,4 +1,4 @@
-"""Sidebar panel registration for Centauri File Sync."""
+"""Sidebar panel registration for Print Orbit."""
 from pathlib import Path
 
 from homeassistant.components import frontend, panel_custom
@@ -9,7 +9,7 @@ from .const import DOMAIN, PANEL_ICON, PANEL_TITLE, PANEL_URL, STATIC_URL, VERSI
 
 
 async def async_register_panel(hass: HomeAssistant, *, register_static: bool = True) -> None:
-    """Serve and register the Centauri File Sync panel."""
+    """Serve and register the Print Orbit panel."""
     if register_static:
         frontend_dir = Path(__file__).parent / "frontend"
         await hass.http.async_register_static_paths(
@@ -21,7 +21,7 @@ async def async_register_panel(hass: HomeAssistant, *, register_static: bool = T
 
     await panel_custom.async_register_panel(
         hass,
-        webcomponent_name="centauri-file-sync-panel",
+        webcomponent_name="print-orbit-panel",
         frontend_url_path=PANEL_URL,
         module_url=f"{STATIC_URL}/panel.js?v={VERSION}",
         sidebar_title=PANEL_TITLE,

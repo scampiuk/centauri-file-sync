@@ -1,4 +1,4 @@
-"""Centauri File Sync integration."""
+"""Print Orbit integration."""
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
@@ -8,7 +8,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN
 from .http import register_views
-from .manager import CentauriFileSyncManager
+from .manager import PrintOrbitManager
 from .panel import async_register_panel, async_unregister_panel
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
@@ -21,11 +21,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Centauri File Sync from a config entry."""
+    """Set up Print Orbit from a config entry."""
     domain_data = hass.data.setdefault(DOMAIN, {})
 
     if "manager" not in domain_data:
-        manager = CentauriFileSyncManager(hass)
+        manager = PrintOrbitManager(hass)
         await manager.async_setup()
         domain_data["manager"] = manager
 

@@ -1,6 +1,6 @@
 # Home Assistant UI guidelines
 
-Centauri File Sync should look and behave like part of Home Assistant, not like an unrelated web application embedded inside it.
+Print Orbit should look and behave like part of Home Assistant, not like an unrelated web application embedded inside it.
 
 The current reference implementation is the official [Home Assistant frontend](https://github.com/home-assistant/frontend). In particular, use its [shared components](https://github.com/home-assistant/frontend/tree/dev/src/components) and current component contracts as the source of truth.
 
@@ -38,4 +38,4 @@ Before merging a UI change:
 3. Navigate all controls with the keyboard.
 4. Test long printer names and filenames.
 5. Confirm errors and progress remain understandable without relying on colour alone.
-6. Run `node --check custom_components/centauri_file_sync/frontend/panel.js` and `node tests/test_frontend.js`.
+6. Run `node --check custom_components/print_orbit/frontend/panel.js` and `node tests/test_frontend.js`.

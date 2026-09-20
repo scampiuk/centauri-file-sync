@@ -1,4 +1,4 @@
-"""Authenticated HTTP API for the Centauri File Sync panel."""
+"""Authenticated HTTP API for the Print Orbit panel."""
 from __future__ import annotations
 
 import re
@@ -11,7 +11,7 @@ from homeassistant.components.http import KEY_HASS, HomeAssistantView, require_a
 from homeassistant.core import HomeAssistant
 
 from .const import API_BASE, DOMAIN, MAX_FILES_PER_BATCH
-from .manager import CentauriFileSyncManager, safe_filename
+from .manager import PrintOrbitManager, safe_filename
 
 # Keep each browser -> Home Assistant request comfortably below HA Core's
 # current 16 MiB request-body ceiling.
@@ -20,7 +20,7 @@ MAX_STAGED_FILE = 8 * 1024 * 1024 * 1024
 UPLOAD_ID_RE = re.compile(r"^[A-Za-z0-9_-]{8,80}$")
 
 
-def _manager(hass: HomeAssistant) -> CentauriFileSyncManager:
+def _manager(hass: HomeAssistant) -> PrintOrbitManager:
     return hass.data[DOMAIN]["manager"]
 
 

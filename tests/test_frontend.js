@@ -10,10 +10,10 @@ global.customElements = {
   },
 };
 
-require('../custom_components/centauri_file_sync/frontend/panel.js');
+require('../custom_components/print_orbit/frontend/panel.js');
 
 const panelSource = fs.readFileSync(
-  path.join(__dirname, '../custom_components/centauri_file_sync/frontend/panel.js'),
+  path.join(__dirname, '../custom_components/print_orbit/frontend/panel.js'),
   'utf8',
 );
 
@@ -21,12 +21,18 @@ for (const requiredPattern of [
   '<ha-card',
   '<ha-button',
   "document.createElement('ha-alert')",
+  "customElements.define('print-orbit-panel'",
+  '`print_orbit/${path}`',
   'var(--primary-color)',
   '@media (max-width:600px)',
 ]) {
   if (!panelSource.includes(requiredPattern)) {
     throw new Error(`Missing Home Assistant UI pattern: ${requiredPattern}`);
   }
+}
+
+if (panelSource.includes('/api/centauri_file_sync/')) {
+  throw new Error('Legacy API route remains in the Print Orbit panel');
 }
 
 const panel = new Panel();

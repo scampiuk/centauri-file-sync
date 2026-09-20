@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate panel JavaScript
         run: |
-          node --check custom_components/centauri_file_sync/frontend/panel.js
+          node --check custom_components/print_orbit/frontend/panel.js
           node tests/test_frontend.js
 
   hacs:
