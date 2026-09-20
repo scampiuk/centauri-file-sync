@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+- Keep spaces intact in CC1 filenames instead of uploading them as `%20`.
+- Fix the printer form reset error after adding a printer.
+- Warn after uploads that existing printer files were not checked and duplicate filenames may be renamed by the printer.
+
 ## 0.2.1
 
 - Validate printer names, IPv4 addresses, and required CC2 access codes before submitting.

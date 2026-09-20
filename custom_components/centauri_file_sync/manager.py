@@ -225,6 +225,7 @@ class CentauriFileSyncManager:
                         "sent": 0,
                         "total": size,
                         "error": None,
+                        "warning": None,
                     }
                 )
 
@@ -289,6 +290,10 @@ class CentauriFileSyncManager:
                 )
                 item["sent"] = item["total"]
                 item["status"] = "complete"
+                item["warning"] = (
+                    "Existing printer files were not checked; the printer may "
+                    "rename this upload if the filename already exists."
+                )
             except Exception as exc:  # Keep other file/printer uploads running.
                 item["status"] = "failed"
                 item["error"] = str(exc)[:500]

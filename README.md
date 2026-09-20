@@ -54,6 +54,10 @@ Printer configuration is stored using Home Assistant's normal integration storag
 
 Uploads use the printers' HTTP file-transfer endpoints directly; no printer control connection is opened.
 
+## Duplicate filenames
+
+Version 0.2 does not open the printer control connection to list remote files before uploading. If a filename already exists, the printer may keep both files by renaming the new upload. The completion screen explicitly warns when this has not been checked. Remote duplicate detection is planned separately from the HTTP-only uploader.
+
 ## Safety scope
 
 Version 0.2 deliberately exposes no print-start action and no remote delete action. File distribution is the only printer-changing operation.

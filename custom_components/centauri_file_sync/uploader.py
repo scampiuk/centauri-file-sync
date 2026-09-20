@@ -106,7 +106,9 @@ async def _upload_cc1(
         if not chunk:
             raise RuntimeError("Unexpected end of file while uploading")
 
-        form = aiohttp.FormData()
+        # The CC1 firmware stores RFC 7578 filename escaping literally. With
+        # aiohttp's default quoting, spaces become "%20" on the printer.
+        form = aiohttp.FormData(quote_fields=False)
         form.add_field("Check", "1")
         form.add_field("S-File-MD5", checksum)
         form.add_field("Offset", str(offset))

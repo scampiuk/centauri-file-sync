@@ -75,7 +75,7 @@ class CentauriFileSyncPanel extends HTMLElement {
       <div class="cfs-wrap">
         <div class="cfs-top">
           <div><h1 class="cfs-title">Centauri File Sync</h1><div class="cfs-sub">Stage G-code once, then copy it to every selected printer.</div></div>
-          <span class="cfs-badge">v0.2.1 · HACS edition · upload only</span>
+          <span class="cfs-badge">v0.2.2 · HACS edition · upload only</span>
         </div>
 
         <div class="cfs-grid">
@@ -171,6 +171,7 @@ class CentauriFileSyncPanel extends HTMLElement {
   }
 
   _bind() {
+    const printerForm = this._$('cfsPrinterForm');
     const printerHost = this._$('cfsPrinterHost');
     const accessCode = this._$('cfsAccessCode');
     const updateModelFields = () => {
@@ -187,9 +188,8 @@ class CentauriFileSyncPanel extends HTMLElement {
     });
     accessCode.addEventListener('input', () => accessCode.setCustomValidity(''));
 
-    this._$('cfsPrinterForm').addEventListener('submit', async (event) => {
+    printerForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const form = event.target;
       const host = printerHost.value.trim();
       if (!this._isIPv4(host)) {
         const message = 'Enter a valid IPv4 address, for example 192.168.1.51.';
@@ -206,7 +206,7 @@ class CentauriFileSyncPanel extends HTMLElement {
         this._note('cfsPrinterNotice', message, true);
         return;
       }
-      if (!form.reportValidity()) return;
+      if (!printerForm.reportValidity()) return;
 
       this._note('cfsPrinterNotice', 'Saving…');
       const body = {
@@ -217,7 +217,7 @@ class CentauriFileSyncPanel extends HTMLElement {
       };
       try {
         await this._api('POST', 'printers', body);
-        form.reset();
+        printerForm.reset();
         updateModelFields();
         this._note('cfsPrinterNotice', 'Printer added.');
         await this._refreshPrinters();
@@ -334,7 +334,13 @@ class CentauriFileSyncPanel extends HTMLElement {
         this._state.poll = setTimeout(() => this._pollJob(), 700);
       } else {
         this._$('cfsCopyButton').disabled = false;
-        this._note('cfsCopyNotice', job.status === 'complete' ? 'All selected uploads completed.' : 'Finished with one or more failures.', job.status !== 'complete');
+        this._note(
+          'cfsCopyNotice',
+          job.status === 'complete'
+            ? 'Uploads completed. Existing printer files were not checked; a printer may rename duplicates.'
+            : 'Finished with one or more failures.',
+          job.status !== 'complete',
+        );
       }
     } catch (err) {
       this._$('cfsCopyButton').disabled = false;
@@ -345,13 +351,13 @@ class CentauriFileSyncPanel extends HTMLElement {
   _renderJob(job) {
     this._$('cfsJobList').innerHTML = job.items.map(item => {
       const pct = item.total ? Math.round((item.sent / item.total) * 100) : 0;
-      const status = item.status === 'complete' ? '<span class="cfs-ok">✓ complete</span>' :
+      const status = item.status === 'complete' ? '<span class="cfs-ok">✓ uploaded</span>' :
         item.status === 'failed' ? `<span class="cfs-bad" title="${this._esc(item.error || '')}">✕ failed</span>` :
         item.status === 'uploading' ? `<span class="cfs-wait">${pct}%</span>` : '<span class="cfs-muted">queued</span>';
       return `<div class="cfs-job">
         <div class="cfs-name">${this._esc(item.file)}</div>
         <div>${this._esc(item.printer_name)}</div>
-        <div class="cfs-progcell"><div class="cfs-progress"><div class="cfs-bar" style="width:${pct}%"></div></div><div class="cfs-meta">${this._human(item.sent)} / ${this._human(item.total)}${item.error ? ' · ' + this._esc(item.error) : ''}</div></div>
+        <div class="cfs-progcell"><div class="cfs-progress"><div class="cfs-bar" style="width:${pct}%"></div></div><div class="cfs-meta">${this._human(item.sent)} / ${this._human(item.total)}${item.error ? ' · ' + this._esc(item.error) : ''}</div>${item.warning ? `<div class="cfs-wait">${this._esc(item.warning)}</div>` : ''}</div>
         <div>${status}</div>
       </div>`;
     }).join('');

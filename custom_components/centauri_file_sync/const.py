@@ -2,7 +2,7 @@
 
 DOMAIN = "centauri_file_sync"
 NAME = "Centauri File Sync"
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 PANEL_TITLE = "Centauri Sync"
 PANEL_ICON = "mdi:printer-3d"
 PANEL_URL = DOMAIN
