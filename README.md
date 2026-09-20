@@ -42,7 +42,7 @@ Until it is submitted to the default HACS catalogue, install it as a custom repo
 
 1. In Home Assistant, open **HACS**.
 2. Open the three-dot menu and choose **Custom repositories**.
-3. Add `https://github.com/scampiuk/centauri-file-sync`.
+3. Add `https://github.com/scampiuk/print_orbit`.
 4. Choose category **Integration**.
 5. Install **Print Orbit**.
 6. Restart Home Assistant.
