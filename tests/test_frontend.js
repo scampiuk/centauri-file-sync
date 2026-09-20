@@ -1,4 +1,6 @@
 global.HTMLElement = class {};
+const fs = require('fs');
+const path = require('path');
 
 let Panel;
 global.customElements = {
@@ -9,6 +11,23 @@ global.customElements = {
 };
 
 require('../custom_components/centauri_file_sync/frontend/panel.js');
+
+const panelSource = fs.readFileSync(
+  path.join(__dirname, '../custom_components/centauri_file_sync/frontend/panel.js'),
+  'utf8',
+);
+
+for (const requiredPattern of [
+  '<ha-card',
+  '<ha-button',
+  "document.createElement('ha-alert')",
+  'var(--primary-color)',
+  '@media (max-width:600px)',
+]) {
+  if (!panelSource.includes(requiredPattern)) {
+    throw new Error(`Missing Home Assistant UI pattern: ${requiredPattern}`);
+  }
+}
 
 const panel = new Panel();
 const validAddresses = [

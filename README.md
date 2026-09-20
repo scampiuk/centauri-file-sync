@@ -16,6 +16,10 @@ This project intentionally **does not start prints** and **does not delete files
 - HTTP-only printer uploads: the integration does not consume a CC1 SDCP/WebSocket connection slot.
 - Home Assistant sidebar panel using the current HA theme.
 
+## Interface conventions
+
+The panel follows Home Assistant's frontend component and theme conventions. UI contributors should read [docs/UI_GUIDELINES.md](docs/UI_GUIDELINES.md) before changing the panel; automated coding agents must also follow the repository instructions in [AGENTS.md](AGENTS.md).
+
 ## HACS installation
 
 This repository is structured as a HACS **Integration** repository.
@@ -56,8 +60,8 @@ Uploads use the printers' HTTP file-transfer endpoints directly; no printer cont
 
 ## Duplicate filenames
 
-Version 0.2 does not open the printer control connection to list remote files before uploading. If a filename already exists, the printer may keep both files by renaming the new upload. The completion screen explicitly warns when this has not been checked. Remote duplicate detection is planned separately from the HTTP-only uploader.
+Version 0.3 does not open the printer control connection to list remote files before uploading. If a filename already exists, the printer may keep both files by renaming the new upload. The completion screen explicitly warns when this has not been checked. Remote duplicate detection is planned separately from the HTTP-only uploader.
 
 ## Safety scope
 
-Version 0.2 deliberately exposes no print-start action and no remote delete action. File distribution is the only printer-changing operation.
+Version 0.3 deliberately exposes no print-start action and no remote delete action. File distribution is the only printer-changing operation.

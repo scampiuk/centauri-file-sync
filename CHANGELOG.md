@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0
+
+- Redesign the sidebar panel around Home Assistant cards, buttons, alerts, icons, theme tokens, spacing, and responsive layout conventions.
+- Replace the browser file control with a focused drag-and-drop area and Home Assistant-styled file picker action.
+- Add clear empty states, selection summaries, busy states, and accessible semantic status alerts.
+- Add repository UI guidance so future changes continue to follow Home Assistant frontend patterns.
+
 ## 0.2.2
 
 - Keep spaces intact in CC1 filenames instead of uploading them as `%20`.

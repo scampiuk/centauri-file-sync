@@ -26,89 +26,165 @@ class CentauriFileSyncPanel extends HTMLElement {
   _render() {
     this.innerHTML = `
       <style>
-        centauri-file-sync-panel { display:block; min-height:100%; background:var(--primary-background-color); color:var(--primary-text-color); }
-        .cfs-wrap { max-width:1120px; margin:0 auto; padding:24px; }
-        .cfs-top { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:22px; }
-        .cfs-title { font-size:1.6rem; margin:0 0 4px; font-weight:600; }
+        centauri-file-sync-panel {
+          display:block;
+          min-height:100%;
+          background:var(--primary-background-color);
+          color:var(--primary-text-color);
+          --cfs-space-1:var(--ha-space-1, 4px);
+          --cfs-space-2:var(--ha-space-2, 8px);
+          --cfs-space-3:var(--ha-space-3, 12px);
+          --cfs-space-4:var(--ha-space-4, 16px);
+          --cfs-space-6:var(--ha-space-6, 24px);
+        }
+        * { box-sizing:border-box; }
+        .cfs-wrap { max-width:1200px; margin:0 auto; padding:var(--cfs-space-6); }
+        .cfs-top { display:flex; align-items:center; justify-content:space-between; gap:var(--cfs-space-4); margin-bottom:var(--cfs-space-6); }
+        .cfs-heading { display:flex; align-items:center; gap:var(--cfs-space-3); min-width:0; }
+        .cfs-heading-icon { display:grid; place-items:center; width:48px; height:48px; flex:0 0 48px; border-radius:var(--ha-border-radius-lg, 12px); background:var(--ha-color-fill-primary-quiet-resting, var(--secondary-background-color)); color:var(--primary-color); }
+        .cfs-heading-icon ha-icon { --mdc-icon-size:28px; }
+        .cfs-title { font-size:var(--ha-font-size-2xl, 24px); line-height:1.2; margin:0 0 var(--cfs-space-1); font-weight:var(--ha-font-weight-medium, 500); letter-spacing:-.01em; }
         .cfs-sub, .cfs-muted { color:var(--secondary-text-color); }
-        .cfs-badge { font-size:.78rem; padding:5px 9px; border:1px solid var(--divider-color); border-radius:999px; color:var(--secondary-text-color); white-space:nowrap; }
-        .cfs-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-        .cfs-card { background:var(--card-background-color); border:1px solid var(--divider-color); border-radius:14px; padding:18px; min-width:0; box-shadow:var(--ha-card-box-shadow, none); }
+        .cfs-sub { line-height:1.45; }
+        .cfs-badge { font-size:var(--ha-font-size-xs, 12px); padding:var(--cfs-space-1) var(--cfs-space-3); border:1px solid var(--divider-color); border-radius:var(--ha-border-radius-pill, 999px); color:var(--secondary-text-color); white-space:nowrap; }
+        .cfs-grid { display:grid; grid-template-columns:minmax(0, 1.1fr) minmax(360px, .9fr); gap:var(--cfs-space-4); align-items:start; }
+        ha-card.cfs-card { min-width:0; overflow:hidden; }
         .cfs-wide { grid-column:1/-1; }
-        .cfs-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; }
-        .cfs-head h2 { font-size:1.05rem; margin:0; }
-        .cfs-row { display:grid; grid-template-columns:1.2fr 1fr .7fr auto; gap:10px; align-items:end; }
-        .cfs-field label { display:block; font-size:.84rem; color:var(--secondary-text-color); margin-bottom:5px; }
-        .cfs-field input, .cfs-field select, .cfs-picker { width:100%; min-height:42px; padding:8px 10px; border-radius:9px; border:1px solid var(--divider-color); background:var(--input-fill-color, var(--secondary-background-color)); color:var(--primary-text-color); font:inherit; }
-        .cfs-field input.cfs-input-error { border-color:var(--error-color); outline:1px solid var(--error-color); }
-        .cfs-button { min-height:40px; border:0; border-radius:9px; padding:8px 13px; cursor:pointer; background:var(--secondary-background-color); color:var(--primary-text-color); font:inherit; }
-        .cfs-button.primary { background:var(--primary-color); color:var(--text-primary-color, white); }
-        .cfs-button.danger { background:var(--error-color); color:white; }
-        .cfs-button:disabled { opacity:.45; cursor:not-allowed; }
-        .cfs-list { display:flex; flex-direction:column; gap:8px; }
-        .cfs-item { display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; background:var(--secondary-background-color); border:1px solid var(--divider-color); border-radius:10px; padding:10px 12px; min-width:0; }
-        .cfs-item input[type=checkbox] { width:18px; height:18px; accent-color:var(--primary-color); }
-        .cfs-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .cfs-meta { color:var(--secondary-text-color); font-size:.8rem; }
-        .cfs-drop { border:1px dashed var(--secondary-text-color); border-radius:11px; padding:18px; text-align:center; margin-bottom:12px; }
-        .cfs-drop.drag { border-color:var(--primary-color); background:color-mix(in srgb, var(--primary-color) 10%, transparent); }
-        .cfs-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-        .cfs-notice { margin-top:12px; min-height:20px; font-size:.88rem; color:var(--primary-color); }
-        .cfs-error { color:var(--error-color); }
-        .cfs-job { display:grid; grid-template-columns:1.1fr 1.1fr 2fr auto; gap:10px; align-items:center; padding:9px 0; border-bottom:1px solid var(--divider-color); }
+        .card-content { padding:var(--cfs-space-4); }
+        .cfs-card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:var(--cfs-space-3); margin-bottom:var(--cfs-space-4); }
+        .cfs-card-title { display:flex; align-items:flex-start; gap:var(--cfs-space-3); min-width:0; }
+        .cfs-step { display:grid; place-items:center; width:28px; height:28px; flex:0 0 28px; border-radius:50%; background:var(--primary-color); color:var(--text-primary-color, white); font-size:var(--ha-font-size-s, 13px); font-weight:var(--ha-font-weight-bold, 700); }
+        .cfs-card-title h2 { font-size:var(--ha-font-size-l, 18px); line-height:1.25; margin:2px 0 var(--cfs-space-1); font-weight:var(--ha-font-weight-medium, 500); }
+        .cfs-card-description { color:var(--secondary-text-color); font-size:var(--ha-font-size-s, 13px); line-height:1.4; }
+        .cfs-count { flex:none; padding-top:4px; color:var(--secondary-text-color); font-size:var(--ha-font-size-s, 13px); }
+        .cfs-form-grid { display:grid; grid-template-columns:minmax(0, 1.2fr) minmax(0, 1fr) 120px auto; gap:var(--cfs-space-2); align-items:start; }
+        .cfs-field { min-width:0; }
+        .cfs-field label { display:block; font-size:var(--ha-font-size-xs, 12px); color:var(--secondary-text-color); margin:0 0 var(--cfs-space-1) var(--cfs-space-1); }
+        .cfs-field input, .cfs-field select {
+          width:100%; height:48px; padding:0 var(--cfs-space-3); border:0; border-bottom:1px solid var(--ha-color-border-neutral-loud, var(--divider-color)); border-radius:var(--ha-border-radius-md, 8px) var(--ha-border-radius-md, 8px) 0 0;
+          background:var(--ha-color-form-background-resting, var(--input-fill-color, var(--secondary-background-color))); color:var(--primary-text-color); font:inherit; outline:none;
+        }
+        .cfs-field select { cursor:pointer; }
+        .cfs-field input:hover, .cfs-field select:hover { background:var(--ha-color-form-background-hover, var(--secondary-background-color)); }
+        .cfs-field input:focus, .cfs-field select:focus { border-bottom:2px solid var(--primary-color); }
+        .cfs-field input.cfs-input-error { border-bottom-color:var(--error-color); background:var(--ha-color-fill-danger-quiet-resting, var(--input-fill-color, var(--secondary-background-color))); }
+        .cfs-add { align-self:end; margin-bottom:0; }
+        .cfs-native-submit { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+        .cfs-list { display:flex; flex-direction:column; margin-top:var(--cfs-space-4); border-top:1px solid var(--divider-color); }
+        .cfs-item { display:grid; grid-template-columns:auto auto minmax(0, 1fr) auto; gap:var(--cfs-space-3); align-items:center; min-width:0; min-height:64px; padding:var(--cfs-space-2) 0; border-bottom:1px solid var(--divider-color); }
+        .cfs-item:last-child { border-bottom:0; }
+        .cfs-item input[type=checkbox] { width:20px; height:20px; margin:0 var(--cfs-space-1); accent-color:var(--primary-color); cursor:pointer; }
+        .cfs-item-icon { display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:var(--ha-color-fill-neutral-quiet-resting, var(--secondary-background-color)); color:var(--secondary-text-color); }
+        .cfs-item-icon ha-icon { --mdc-icon-size:20px; }
+        .cfs-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+        .cfs-meta { color:var(--secondary-text-color); font-size:var(--ha-font-size-xs, 12px); line-height:1.4; overflow:hidden; text-overflow:ellipsis; }
+        .cfs-drop { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:180px; border:2px dashed var(--ha-color-border-neutral-normal, var(--divider-color)); border-radius:var(--ha-border-radius-lg, 12px); padding:var(--cfs-space-6); text-align:center; transition:background-color .15s ease, border-color .15s ease; }
+        .cfs-drop-icon { display:grid; place-items:center; width:52px; height:52px; margin-bottom:var(--cfs-space-3); border-radius:50%; background:var(--ha-color-fill-primary-quiet-resting, var(--secondary-background-color)); color:var(--primary-color); }
+        .cfs-drop-icon ha-icon { --mdc-icon-size:28px; }
+        .cfs-drop-title { font-weight:var(--ha-font-weight-medium, 500); margin-bottom:var(--cfs-space-1); }
+        .cfs-drop.drag { border-color:var(--primary-color); background:var(--ha-color-fill-primary-quiet-resting, var(--secondary-background-color)); }
+        .cfs-picker { display:none; }
+        .cfs-actions { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--cfs-space-2); margin-top:var(--cfs-space-3); }
+        .cfs-notice:empty { display:none; }
+        .cfs-notice { display:block; margin-top:var(--cfs-space-3); }
+        .cfs-empty { display:flex; flex-direction:column; align-items:center; gap:var(--cfs-space-2); color:var(--secondary-text-color); font-size:var(--ha-font-size-s, 13px); padding:var(--cfs-space-6) var(--cfs-space-3); text-align:center; }
+        .cfs-empty ha-icon { --mdc-icon-size:28px; opacity:.7; }
+        .cfs-copy-layout { display:grid; grid-template-columns:minmax(0, 1fr) auto; gap:var(--cfs-space-4); align-items:center; }
+        .cfs-selection { display:flex; flex-wrap:wrap; gap:var(--cfs-space-2); margin-top:var(--cfs-space-3); }
+        .cfs-selection-chip { display:inline-flex; align-items:center; gap:var(--cfs-space-1); padding:5px 10px; border-radius:var(--ha-border-radius-pill, 999px); background:var(--ha-color-fill-neutral-quiet-resting, var(--secondary-background-color)); color:var(--secondary-text-color); font-size:var(--ha-font-size-xs, 12px); }
+        .cfs-selection-chip ha-icon { --mdc-icon-size:16px; }
+        .cfs-job-list:not(:empty) { margin-top:var(--cfs-space-4); border-top:1px solid var(--divider-color); }
+        .cfs-job { display:grid; grid-template-columns:1.1fr 1.1fr 2fr auto; gap:var(--cfs-space-3); align-items:center; padding:var(--cfs-space-3) 0; border-bottom:1px solid var(--divider-color); }
         .cfs-job:last-child { border-bottom:0; }
-        .cfs-progress { height:9px; background:var(--secondary-background-color); border-radius:999px; overflow:hidden; }
+        .cfs-progress { height:6px; background:var(--secondary-background-color); border-radius:var(--ha-border-radius-pill, 999px); overflow:hidden; }
         .cfs-bar { height:100%; width:0; background:var(--primary-color); transition:width .2s ease; }
-        .cfs-ok { color:var(--success-color, #2e7d32); } .cfs-bad { color:var(--error-color); } .cfs-wait { color:var(--warning-color, #f9a825); }
-        .cfs-empty { color:var(--secondary-text-color); font-size:.9rem; padding:10px 0; }
-        @media (max-width:760px) {
+        .cfs-ok { color:var(--success-color, var(--primary-color)); } .cfs-bad { color:var(--error-color); } .cfs-wait { color:var(--warning-color, var(--secondary-text-color)); }
+        @media (max-width:900px) {
           .cfs-grid { grid-template-columns:1fr; }
           .cfs-wide { grid-column:auto; }
-          .cfs-row { grid-template-columns:1fr 1fr; }
-          .cfs-full-mobile { grid-column:1/-1; }
+          .cfs-form-grid { grid-template-columns:1fr 1fr; }
+          .cfs-access-code { grid-column:1/-1; }
+          .cfs-add { align-self:end; }
+        }
+        @media (max-width:600px) {
+          .cfs-wrap { padding:var(--cfs-space-3); }
+          .cfs-top { align-items:flex-start; }
+          .cfs-heading-icon { width:40px; height:40px; flex-basis:40px; }
+          .cfs-badge { display:none; }
+          .cfs-form-grid { grid-template-columns:1fr; }
+          .cfs-access-code { grid-column:auto; }
+          .cfs-add { justify-self:stretch; }
+          .cfs-add, .cfs-add ha-button { width:100%; }
+          .cfs-copy-layout { grid-template-columns:1fr; }
+          .cfs-copy-layout ha-button { width:100%; }
           .cfs-job { grid-template-columns:1fr 1fr; }
           .cfs-progcell { grid-column:1/-1; }
-          .cfs-top { flex-direction:column; }
-          .cfs-wrap { padding:14px; }
         }
       </style>
       <div class="cfs-wrap">
         <div class="cfs-top">
-          <div><h1 class="cfs-title">Centauri File Sync</h1><div class="cfs-sub">Stage G-code once, then copy it to every selected printer.</div></div>
-          <span class="cfs-badge">v0.2.2 · HACS edition · upload only</span>
+          <div class="cfs-heading">
+            <div class="cfs-heading-icon"><ha-icon icon="mdi:printer-3d"></ha-icon></div>
+            <div><h1 class="cfs-title">Centauri File Sync</h1><div class="cfs-sub">Stage G-code once, then send it to every selected printer.</div></div>
+          </div>
+          <span class="cfs-badge">v0.3.0 · upload only</span>
         </div>
 
         <div class="cfs-grid">
-          <section class="cfs-card">
-            <div class="cfs-head"><h2>1. Printers</h2><span id="cfsPrinterCount" class="cfs-muted"></span></div>
-            <form id="cfsPrinterForm" class="cfs-row">
-              <div class="cfs-field"><label for="cfsPrinterName">Name</label><input id="cfsPrinterName" required placeholder="Left printer"></div>
-              <div class="cfs-field"><label for="cfsPrinterHost">IP address</label><input id="cfsPrinterHost" required inputmode="decimal" maxlength="15" autocomplete="off" spellcheck="false" placeholder="192.168.1.51"></div>
-              <div class="cfs-field"><label for="cfsPrinterModel">Model</label><select id="cfsPrinterModel"><option value="cc1">CC1</option><option value="cc2">CC2</option></select></div>
-              <button class="cfs-button primary cfs-full-mobile" type="submit">Add</button>
-              <div id="cfsAccessCodeWrap" class="cfs-field cfs-full-mobile" style="display:none"><label for="cfsAccessCode">CC2 access code</label><input id="cfsAccessCode" type="password" autocomplete="off"></div>
-            </form>
-            <div id="cfsPrinterNotice" class="cfs-notice"></div>
-            <div id="cfsPrinterList" class="cfs-list"></div>
-          </section>
-
-          <section class="cfs-card">
-            <div class="cfs-head"><h2>2. G-code files</h2><span id="cfsFileCount" class="cfs-muted"></span></div>
-            <div id="cfsDrop" class="cfs-drop">
-              <strong>Drop .gcode files here</strong><br><span class="cfs-muted">or choose multiple files</span><br><br>
-              <input id="cfsFilePicker" class="cfs-picker" type="file" multiple accept=".gcode" style="max-width:360px">
+          <ha-card class="cfs-card">
+            <div class="card-content">
+              <div class="cfs-card-head">
+                <div class="cfs-card-title"><span class="cfs-step">1</span><div><h2>Printers</h2><div class="cfs-card-description">Add and select the printers that should receive files.</div></div></div>
+                <span id="cfsPrinterCount" class="cfs-count"></span>
+              </div>
+              <form id="cfsPrinterForm" class="cfs-form-grid">
+                <div class="cfs-field"><label for="cfsPrinterName">Printer name</label><input id="cfsPrinterName" required autocomplete="off" placeholder="Left printer"></div>
+                <div class="cfs-field"><label for="cfsPrinterHost">IPv4 address</label><input id="cfsPrinterHost" required inputmode="decimal" maxlength="15" autocomplete="off" spellcheck="false" placeholder="192.168.1.51"></div>
+                <div class="cfs-field"><label for="cfsPrinterModel">Model</label><select id="cfsPrinterModel"><option value="cc1">CC1</option><option value="cc2">CC2</option></select></div>
+                <div class="cfs-add"><ha-button id="cfsAddPrinter" appearance="filled" type="button">Add printer</ha-button></div>
+                <div id="cfsAccessCodeWrap" class="cfs-field cfs-access-code" style="display:none"><label for="cfsAccessCode">CC2 access code</label><input id="cfsAccessCode" type="password" autocomplete="off"></div>
+                <button class="cfs-native-submit" type="submit" tabindex="-1" aria-hidden="true"></button>
+              </form>
+              <div id="cfsPrinterNotice" class="cfs-notice"></div>
+              <div id="cfsPrinterList" class="cfs-list"></div>
             </div>
-            <div id="cfsFileNotice" class="cfs-notice"></div>
-            <div id="cfsFileList" class="cfs-list"></div>
-            <div class="cfs-actions"><button id="cfsRemoveStaged" class="cfs-button danger" type="button">Remove selected from staging</button></div>
-          </section>
+          </ha-card>
 
-          <section class="cfs-card cfs-wide">
-            <div class="cfs-head"><div><h2>3. Copy</h2><div class="cfs-muted">Different printers upload in parallel. Each individual printer receives one file at a time.</div></div></div>
-            <button id="cfsCopyButton" class="cfs-button primary" type="button">Copy selected files to selected printers</button>
-            <div id="cfsCopyNotice" class="cfs-notice"></div>
-            <div id="cfsJobList"></div>
-          </section>
+          <ha-card class="cfs-card">
+            <div class="card-content">
+              <div class="cfs-card-head">
+                <div class="cfs-card-title"><span class="cfs-step">2</span><div><h2>G-code files</h2><div class="cfs-card-description">Stage one or more sliced files in Home Assistant.</div></div></div>
+                <span id="cfsFileCount" class="cfs-count"></span>
+              </div>
+              <div id="cfsDrop" class="cfs-drop">
+                <div class="cfs-drop-icon"><ha-icon icon="mdi:file-upload-outline"></ha-icon></div>
+                <div class="cfs-drop-title">Drop .gcode files here</div>
+                <div class="cfs-muted">or select files from this device</div>
+                <ha-button id="cfsChooseFiles" appearance="outlined" size="s" type="button" style="margin-top:12px">Choose files</ha-button>
+                <input id="cfsFilePicker" class="cfs-picker" type="file" multiple accept=".gcode">
+              </div>
+              <div id="cfsFileNotice" class="cfs-notice"></div>
+              <div id="cfsFileList" class="cfs-list"></div>
+              <div class="cfs-actions"><span class="cfs-muted">Files stay staged until removed.</span><ha-button id="cfsRemoveStaged" appearance="plain" variant="danger" size="s" type="button">Remove selected</ha-button></div>
+            </div>
+          </ha-card>
+
+          <ha-card class="cfs-card cfs-wide">
+            <div class="card-content">
+              <div class="cfs-copy-layout">
+                <div>
+                  <div class="cfs-card-title"><span class="cfs-step">3</span><div><h2>Send files</h2><div class="cfs-card-description">Printers upload in parallel; each printer receives one file at a time.</div></div></div>
+                  <div class="cfs-selection">
+                    <span class="cfs-selection-chip"><ha-icon icon="mdi:file-check-outline"></ha-icon><span id="cfsSelectedFileCount">0 files selected</span></span>
+                    <span class="cfs-selection-chip"><ha-icon icon="mdi:printer-3d"></ha-icon><span id="cfsSelectedPrinterCount">0 printers selected</span></span>
+                  </div>
+                </div>
+                <ha-button id="cfsCopyButton" appearance="filled" size="l" type="button">Send selected files</ha-button>
+              </div>
+              <div id="cfsCopyNotice" class="cfs-notice"></div>
+              <div id="cfsJobList" class="cfs-job-list"></div>
+            </div>
+          </ha-card>
         </div>
       </div>`;
   }
@@ -116,8 +192,31 @@ class CentauriFileSyncPanel extends HTMLElement {
   _$(id) { return this.querySelector(`#${id}`); }
   _esc(value) { return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
   _human(n) { return n < 1024 ? `${n} B` : n < 1048576 ? `${(n/1024).toFixed(1)} KB` : `${(n/1048576).toFixed(1)} MB`; }
-  _selected(selector) { return [...this.querySelectorAll(`${selector}:checked`)].map(x => x.value); }
-  _note(id, message, error=false) { const el=this._$(id); el.textContent=message || ''; el.className=`cfs-notice${error?' cfs-error':''}`; }
+  _selected(selector) { return [...this.querySelectorAll(selector)].filter(x => x.checked).map(x => x.value); }
+  _note(id, message, type='info') {
+    const host = this._$(id);
+    host.replaceChildren();
+    if (!message) return;
+    const alert = document.createElement('ha-alert');
+    alert.setAttribute('alert-type', type === true ? 'error' : type);
+    alert.textContent = message;
+    host.appendChild(alert);
+  }
+
+  _setButtonBusy(id, busy) {
+    const button = this._$(id);
+    button.disabled = busy;
+    button.loading = busy;
+  }
+
+  _updateSelectionSummary() {
+    const files = this._selected('.cfsFileCheck').length;
+    const printers = this._selected('.cfsPrinterCheck').length;
+    this._$('cfsSelectedFileCount').textContent = `${files} file${files === 1 ? '' : 's'} selected`;
+    this._$('cfsSelectedPrinterCount').textContent = `${printers} printer${printers === 1 ? '' : 's'} selected`;
+    this._$('cfsRemoveStaged').disabled = files === 0;
+    if (!this._state.jobId) this._$('cfsCopyButton').disabled = files === 0 || printers === 0;
+  }
 
   _errorMessage(error, fallback='Request failed.') {
     if (!error) return fallback;
@@ -182,6 +281,7 @@ class CentauriFileSyncPanel extends HTMLElement {
     };
 
     this._$('cfsPrinterModel').addEventListener('change', updateModelFields);
+    this._$('cfsAddPrinter').addEventListener('click', () => printerForm.requestSubmit());
     printerHost.addEventListener('input', () => {
       printerHost.setCustomValidity('');
       printerHost.classList.remove('cfs-input-error');
@@ -196,19 +296,20 @@ class CentauriFileSyncPanel extends HTMLElement {
         printerHost.setCustomValidity(message);
         printerHost.classList.add('cfs-input-error');
         printerHost.reportValidity();
-        this._note('cfsPrinterNotice', message, true);
+        this._note('cfsPrinterNotice', message, 'error');
         return;
       }
       if (this._$('cfsPrinterModel').value === 'cc2' && !accessCode.value.trim()) {
         const message = 'Enter the access code for this CC2 printer.';
         accessCode.setCustomValidity(message);
         accessCode.reportValidity();
-        this._note('cfsPrinterNotice', message, true);
+        this._note('cfsPrinterNotice', message, 'error');
         return;
       }
       if (!printerForm.reportValidity()) return;
 
       this._note('cfsPrinterNotice', 'Saving…');
+      this._setButtonBusy('cfsAddPrinter', true);
       const body = {
         name: this._$('cfsPrinterName').value.trim(),
         host,
@@ -219,56 +320,67 @@ class CentauriFileSyncPanel extends HTMLElement {
         await this._api('POST', 'printers', body);
         printerForm.reset();
         updateModelFields();
-        this._note('cfsPrinterNotice', 'Printer added.');
+        this._note('cfsPrinterNotice', 'Printer added.', 'success');
         await this._refreshPrinters();
-      } catch (err) { this._note('cfsPrinterNotice', this._errorMessage(err), true); }
+      } catch (err) {
+        this._note('cfsPrinterNotice', this._errorMessage(err), 'error');
+      } finally {
+        this._setButtonBusy('cfsAddPrinter', false);
+      }
     });
 
     this._$('cfsPrinterList').addEventListener('click', async (event) => {
-      const id = event.target.dataset.removePrinter;
+      const removeButton = event.target.closest('[data-remove-printer]');
+      const id = removeButton && removeButton.dataset.removePrinter;
       if (!id) return;
       try {
         await this._api('DELETE', `printers/${encodeURIComponent(id)}`);
+        this._note('cfsPrinterNotice', 'Printer removed.', 'success');
         await this._refreshPrinters();
-      } catch (err) { this._note('cfsPrinterNotice', this._errorMessage(err), true); }
+      } catch (err) { this._note('cfsPrinterNotice', this._errorMessage(err), 'error'); }
     });
+    this._$('cfsPrinterList').addEventListener('change', () => this._updateSelectionSummary());
 
+    this._$('cfsChooseFiles').addEventListener('click', () => this._$('cfsFilePicker').click());
     this._$('cfsFilePicker').addEventListener('change', (event) => this._stage(event.target.files));
     const drop = this._$('cfsDrop');
     ['dragenter','dragover'].forEach(name => drop.addEventListener(name, event => { event.preventDefault(); drop.classList.add('drag'); }));
     ['dragleave','drop'].forEach(name => drop.addEventListener(name, event => { event.preventDefault(); drop.classList.remove('drag'); }));
     drop.addEventListener('drop', event => this._stage(event.dataTransfer.files));
+    this._$('cfsFileList').addEventListener('change', () => this._updateSelectionSummary());
 
     this._$('cfsRemoveStaged').addEventListener('click', async () => {
       const files = this._selected('.cfsFileCheck');
-      if (!files.length) { this._note('cfsFileNotice', 'Select at least one staged file.', true); return; }
+      if (!files.length) { this._note('cfsFileNotice', 'Select at least one staged file.', 'error'); return; }
       try {
         await this._api('POST', 'files/delete', { files });
-        this._note('cfsFileNotice', `Removed ${files.length} staged file${files.length===1?'':'s'}.`);
+        this._note('cfsFileNotice', `Removed ${files.length} staged file${files.length===1?'':'s'}.`, 'success');
         await this._refreshFiles();
-      } catch (err) { this._note('cfsFileNotice', this._errorMessage(err), true); }
+      } catch (err) { this._note('cfsFileNotice', this._errorMessage(err), 'error'); }
     });
 
     this._$('cfsCopyButton').addEventListener('click', async () => {
       const files = this._selected('.cfsFileCheck');
       const printers = this._selected('.cfsPrinterCheck');
-      if (!files.length || !printers.length) { this._note('cfsCopyNotice', 'Select at least one file and one printer.', true); return; }
-      this._$('cfsCopyButton').disabled = true;
+      if (!files.length || !printers.length) { this._note('cfsCopyNotice', 'Select at least one file and one printer.', 'error'); return; }
+      this._setButtonBusy('cfsCopyButton', true);
       this._note('cfsCopyNotice', `Starting ${files.length * printers.length} upload${files.length * printers.length === 1 ? '' : 's'}…`);
       try {
         const result = await this._api('POST', 'copy', { files, printers });
         this._state.jobId = result.job_id;
         await this._pollJob();
       } catch (err) {
-        this._$('cfsCopyButton').disabled = false;
-        this._note('cfsCopyNotice', this._errorMessage(err), true);
+        this._state.jobId = null;
+        this._setButtonBusy('cfsCopyButton', false);
+        this._note('cfsCopyNotice', this._errorMessage(err), 'error');
+        this._updateSelectionSummary();
       }
     });
   }
 
   async _refreshAll() {
     try { await Promise.all([this._refreshPrinters(), this._refreshFiles()]); }
-    catch (err) { this._note('cfsCopyNotice', this._errorMessage(err), true); }
+    catch (err) { this._note('cfsCopyNotice', this._errorMessage(err), 'error'); }
   }
 
   async _refreshPrinters() {
@@ -277,9 +389,11 @@ class CentauriFileSyncPanel extends HTMLElement {
     this._$('cfsPrinterList').innerHTML = this._state.printers.length ? this._state.printers.map(p => `
       <div class="cfs-item">
         <input class="cfsPrinterCheck" type="checkbox" value="${this._esc(p.id)}" checked aria-label="Select ${this._esc(p.name)}">
+        <span class="cfs-item-icon"><ha-icon icon="mdi:printer-3d"></ha-icon></span>
         <div class="cfs-name"><strong>${this._esc(p.name)}</strong><div class="cfs-meta">${this._esc(p.host)} · ${String(p.model).toUpperCase()}${p.has_access_code?' · access code saved':''}</div></div>
-        <button class="cfs-button" type="button" data-remove-printer="${this._esc(p.id)}">Remove</button>
-      </div>`).join('') : '<div class="cfs-empty">Add your Centauri printers above.</div>';
+        <ha-button appearance="plain" variant="danger" size="s" type="button" data-remove-printer="${this._esc(p.id)}">Remove</ha-button>
+      </div>`).join('') : '<div class="cfs-empty"><ha-icon icon="mdi:printer-off-outline"></ha-icon><span>No printers configured yet.</span></div>';
+    this._updateSelectionSummary();
   }
 
   async _refreshFiles() {
@@ -288,16 +402,18 @@ class CentauriFileSyncPanel extends HTMLElement {
     this._$('cfsFileList').innerHTML = this._state.files.length ? this._state.files.map(f => `
       <div class="cfs-item">
         <input class="cfsFileCheck" type="checkbox" value="${this._esc(f.name)}" checked aria-label="Select ${this._esc(f.name)}">
+        <span class="cfs-item-icon"><ha-icon icon="mdi:file-code-outline"></ha-icon></span>
         <div class="cfs-name"><strong>${this._esc(f.name)}</strong><div class="cfs-meta">${this._human(f.size)}</div></div>
-        <span class="cfs-meta">ready</span>
-      </div>`).join('') : '<div class="cfs-empty">No files staged yet.</div>';
+        <span class="cfs-meta">Ready</span>
+      </div>`).join('') : '<div class="cfs-empty"><ha-icon icon="mdi:file-outline"></ha-icon><span>No files staged yet.</span></div>';
+    this._updateSelectionSummary();
   }
 
   async _stage(fileList) {
     const files = [...fileList];
     if (!files.length) return;
     const invalid = files.find(file => !file.name.toLowerCase().endsWith('.gcode'));
-    if (invalid) { this._note('cfsFileNotice', `${invalid.name}: only .gcode files are accepted.`, true); return; }
+    if (invalid) { this._note('cfsFileNotice', `${invalid.name}: only .gcode files are accepted.`, 'error'); return; }
 
     const chunkSize = 4 * 1024 * 1024;
     try {
@@ -317,10 +433,10 @@ class CentauriFileSyncPanel extends HTMLElement {
           this._note('cfsFileNotice', `Staging ${index + 1}/${files.length}: ${file.name} · ${pct}%`);
         }
       }
-      this._note('cfsFileNotice', `Staged ${files.length} file${files.length===1?'':'s'}.`);
+      this._note('cfsFileNotice', `Staged ${files.length} file${files.length===1?'':'s'}.`, 'success');
       await this._refreshFiles();
     } catch (err) {
-      this._note('cfsFileNotice', this._errorMessage(err), true);
+      this._note('cfsFileNotice', this._errorMessage(err), 'error');
     }
     this._$('cfsFilePicker').value = '';
   }
@@ -333,18 +449,22 @@ class CentauriFileSyncPanel extends HTMLElement {
       if (job.status === 'running') {
         this._state.poll = setTimeout(() => this._pollJob(), 700);
       } else {
-        this._$('cfsCopyButton').disabled = false;
+        this._state.jobId = null;
+        this._setButtonBusy('cfsCopyButton', false);
         this._note(
           'cfsCopyNotice',
           job.status === 'complete'
             ? 'Uploads completed. Existing printer files were not checked; a printer may rename duplicates.'
             : 'Finished with one or more failures.',
-          job.status !== 'complete',
+          job.status === 'complete' ? 'warning' : 'error',
         );
+        this._updateSelectionSummary();
       }
     } catch (err) {
-      this._$('cfsCopyButton').disabled = false;
-      this._note('cfsCopyNotice', this._errorMessage(err), true);
+      this._state.jobId = null;
+      this._setButtonBusy('cfsCopyButton', false);
+      this._note('cfsCopyNotice', this._errorMessage(err), 'error');
+      this._updateSelectionSummary();
     }
   }
 
