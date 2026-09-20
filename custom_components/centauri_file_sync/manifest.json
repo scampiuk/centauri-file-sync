@@ -1,0 +1,10 @@
+{
+  "domain": "centauri_file_sync",
+  "name": "Centauri File Sync",
+  "version": "0.2.0",
+  "config_flow": true,
+  "documentation": "https://github.com/scampiuk/centauri-file-sync",
+  "issue_tracker": "https://github.com/scampiuk/centauri-file-sync/issues",
+  "codeowners": ["@scampiuk"],
+  "dependencies": ["frontend", "http", "panel_custom"]
+}
