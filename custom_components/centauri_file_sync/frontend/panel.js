@@ -40,6 +40,7 @@ class CentauriFileSyncPanel extends HTMLElement {
         .cfs-row { display:grid; grid-template-columns:1.2fr 1fr .7fr auto; gap:10px; align-items:end; }
         .cfs-field label { display:block; font-size:.84rem; color:var(--secondary-text-color); margin-bottom:5px; }
         .cfs-field input, .cfs-field select, .cfs-picker { width:100%; min-height:42px; padding:8px 10px; border-radius:9px; border:1px solid var(--divider-color); background:var(--input-fill-color, var(--secondary-background-color)); color:var(--primary-text-color); font:inherit; }
+        .cfs-field input.cfs-input-error { border-color:var(--error-color); outline:1px solid var(--error-color); }
         .cfs-button { min-height:40px; border:0; border-radius:9px; padding:8px 13px; cursor:pointer; background:var(--secondary-background-color); color:var(--primary-text-color); font:inherit; }
         .cfs-button.primary { background:var(--primary-color); color:var(--text-primary-color, white); }
         .cfs-button.danger { background:var(--error-color); color:white; }
@@ -74,7 +75,7 @@ class CentauriFileSyncPanel extends HTMLElement {
       <div class="cfs-wrap">
         <div class="cfs-top">
           <div><h1 class="cfs-title">Centauri File Sync</h1><div class="cfs-sub">Stage G-code once, then copy it to every selected printer.</div></div>
-          <span class="cfs-badge">v0.2.0 · HACS edition · upload only</span>
+          <span class="cfs-badge">v0.2.1 · HACS edition · upload only</span>
         </div>
 
         <div class="cfs-grid">
@@ -82,7 +83,7 @@ class CentauriFileSyncPanel extends HTMLElement {
             <div class="cfs-head"><h2>1. Printers</h2><span id="cfsPrinterCount" class="cfs-muted"></span></div>
             <form id="cfsPrinterForm" class="cfs-row">
               <div class="cfs-field"><label for="cfsPrinterName">Name</label><input id="cfsPrinterName" required placeholder="Left printer"></div>
-              <div class="cfs-field"><label for="cfsPrinterHost">IP address</label><input id="cfsPrinterHost" required inputmode="decimal" placeholder="192.168.1.51"></div>
+              <div class="cfs-field"><label for="cfsPrinterHost">IP address</label><input id="cfsPrinterHost" required inputmode="decimal" maxlength="15" autocomplete="off" spellcheck="false" placeholder="192.168.1.51"></div>
               <div class="cfs-field"><label for="cfsPrinterModel">Model</label><select id="cfsPrinterModel"><option value="cc1">CC1</option><option value="cc2">CC2</option></select></div>
               <button class="cfs-button primary cfs-full-mobile" type="submit">Add</button>
               <div id="cfsAccessCodeWrap" class="cfs-field cfs-full-mobile" style="display:none"><label for="cfsAccessCode">CC2 access code</label><input id="cfsAccessCode" type="password" autocomplete="off"></div>
@@ -118,8 +119,35 @@ class CentauriFileSyncPanel extends HTMLElement {
   _selected(selector) { return [...this.querySelectorAll(`${selector}:checked`)].map(x => x.value); }
   _note(id, message, error=false) { const el=this._$(id); el.textContent=message || ''; el.className=`cfs-notice${error?' cfs-error':''}`; }
 
+  _errorMessage(error, fallback='Request failed.') {
+    if (!error) return fallback;
+    if (typeof error === 'string') return error;
+    const candidates = [
+      error.detail,
+      error.message,
+      error.body && error.body.detail,
+      error.body && error.body.message,
+      error.error && error.error.detail,
+      error.error && error.error.message,
+    ];
+    const message = candidates.find(value => typeof value === 'string' && value.trim() && value !== '[object Object]');
+    return message ? message.trim() : fallback;
+  }
+
+  _isIPv4(value) {
+    const parts = value.split('.');
+    return parts.length === 4 && parts.every(part => {
+      if (!/^(0|[1-9]\d{0,2})$/.test(part)) return false;
+      return Number(part) <= 255;
+    });
+  }
+
   async _api(method, path, body) {
-    return this._hass.callApi(method, `centauri_file_sync/${path}`, body);
+    try {
+      return await this._hass.callApi(method, `centauri_file_sync/${path}`, body);
+    } catch (error) {
+      throw new Error(this._errorMessage(error));
+    }
   }
 
   async _stageChunk(file, uploadId, offset, chunk) {
@@ -143,26 +171,57 @@ class CentauriFileSyncPanel extends HTMLElement {
   }
 
   _bind() {
-    this._$('cfsPrinterModel').addEventListener('change', () => {
-      this._$('cfsAccessCodeWrap').style.display = this._$('cfsPrinterModel').value === 'cc2' ? 'block' : 'none';
+    const printerHost = this._$('cfsPrinterHost');
+    const accessCode = this._$('cfsAccessCode');
+    const updateModelFields = () => {
+      const isCc2 = this._$('cfsPrinterModel').value === 'cc2';
+      this._$('cfsAccessCodeWrap').style.display = isCc2 ? 'block' : 'none';
+      accessCode.required = isCc2;
+      if (!isCc2) accessCode.setCustomValidity('');
+    };
+
+    this._$('cfsPrinterModel').addEventListener('change', updateModelFields);
+    printerHost.addEventListener('input', () => {
+      printerHost.setCustomValidity('');
+      printerHost.classList.remove('cfs-input-error');
     });
+    accessCode.addEventListener('input', () => accessCode.setCustomValidity(''));
 
     this._$('cfsPrinterForm').addEventListener('submit', async (event) => {
       event.preventDefault();
+      const form = event.target;
+      const host = printerHost.value.trim();
+      if (!this._isIPv4(host)) {
+        const message = 'Enter a valid IPv4 address, for example 192.168.1.51.';
+        printerHost.setCustomValidity(message);
+        printerHost.classList.add('cfs-input-error');
+        printerHost.reportValidity();
+        this._note('cfsPrinterNotice', message, true);
+        return;
+      }
+      if (this._$('cfsPrinterModel').value === 'cc2' && !accessCode.value.trim()) {
+        const message = 'Enter the access code for this CC2 printer.';
+        accessCode.setCustomValidity(message);
+        accessCode.reportValidity();
+        this._note('cfsPrinterNotice', message, true);
+        return;
+      }
+      if (!form.reportValidity()) return;
+
       this._note('cfsPrinterNotice', 'Saving…');
       const body = {
         name: this._$('cfsPrinterName').value.trim(),
-        host: this._$('cfsPrinterHost').value.trim(),
+        host,
         model: this._$('cfsPrinterModel').value,
-        access_code: this._$('cfsAccessCode').value.trim() || null,
+        access_code: accessCode.value.trim() || null,
       };
       try {
         await this._api('POST', 'printers', body);
-        event.target.reset();
-        this._$('cfsAccessCodeWrap').style.display = 'none';
+        form.reset();
+        updateModelFields();
         this._note('cfsPrinterNotice', 'Printer added.');
         await this._refreshPrinters();
-      } catch (err) { this._note('cfsPrinterNotice', err.message || String(err), true); }
+      } catch (err) { this._note('cfsPrinterNotice', this._errorMessage(err), true); }
     });
 
     this._$('cfsPrinterList').addEventListener('click', async (event) => {
@@ -171,7 +230,7 @@ class CentauriFileSyncPanel extends HTMLElement {
       try {
         await this._api('DELETE', `printers/${encodeURIComponent(id)}`);
         await this._refreshPrinters();
-      } catch (err) { this._note('cfsPrinterNotice', err.message || String(err), true); }
+      } catch (err) { this._note('cfsPrinterNotice', this._errorMessage(err), true); }
     });
 
     this._$('cfsFilePicker').addEventListener('change', (event) => this._stage(event.target.files));
@@ -187,7 +246,7 @@ class CentauriFileSyncPanel extends HTMLElement {
         await this._api('POST', 'files/delete', { files });
         this._note('cfsFileNotice', `Removed ${files.length} staged file${files.length===1?'':'s'}.`);
         await this._refreshFiles();
-      } catch (err) { this._note('cfsFileNotice', err.message || String(err), true); }
+      } catch (err) { this._note('cfsFileNotice', this._errorMessage(err), true); }
     });
 
     this._$('cfsCopyButton').addEventListener('click', async () => {
@@ -202,14 +261,14 @@ class CentauriFileSyncPanel extends HTMLElement {
         await this._pollJob();
       } catch (err) {
         this._$('cfsCopyButton').disabled = false;
-        this._note('cfsCopyNotice', err.message || String(err), true);
+        this._note('cfsCopyNotice', this._errorMessage(err), true);
       }
     });
   }
 
   async _refreshAll() {
     try { await Promise.all([this._refreshPrinters(), this._refreshFiles()]); }
-    catch (err) { this._note('cfsCopyNotice', err.message || String(err), true); }
+    catch (err) { this._note('cfsCopyNotice', this._errorMessage(err), true); }
   }
 
   async _refreshPrinters() {
@@ -261,7 +320,7 @@ class CentauriFileSyncPanel extends HTMLElement {
       this._note('cfsFileNotice', `Staged ${files.length} file${files.length===1?'':'s'}.`);
       await this._refreshFiles();
     } catch (err) {
-      this._note('cfsFileNotice', err.message || String(err), true);
+      this._note('cfsFileNotice', this._errorMessage(err), true);
     }
     this._$('cfsFilePicker').value = '';
   }
@@ -279,7 +338,7 @@ class CentauriFileSyncPanel extends HTMLElement {
       }
     } catch (err) {
       this._$('cfsCopyButton').disabled = false;
-      this._note('cfsCopyNotice', err.message || String(err), true);
+      this._note('cfsCopyNotice', this._errorMessage(err), true);
     }
   }
 

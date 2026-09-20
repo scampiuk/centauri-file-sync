@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Validate printer names, IPv4 addresses, and required CC2 access codes before submitting.
+- Display structured Home Assistant API errors as readable messages instead of `[object Object]`.
+
 ## 0.2.0
 
 - Reworked the project as a HACS-installable Home Assistant custom integration.

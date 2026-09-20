@@ -4,6 +4,15 @@ on:
   pull_request:
 
 jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate panel JavaScript
+        run: |
+          node --check custom_components/centauri_file_sync/frontend/panel.js
+          node tests/test_frontend.js
+
   hacs:
     runs-on: ubuntu-latest
     steps:
