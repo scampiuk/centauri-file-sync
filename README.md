@@ -20,6 +20,10 @@ This project intentionally **does not start prints** and **does not delete files
 
 The panel follows Home Assistant's frontend component and theme conventions. UI contributors should read [docs/UI_GUIDELINES.md](docs/UI_GUIDELINES.md) before changing the panel; automated coding agents must also follow the repository instructions in [AGENTS.md](AGENTS.md).
 
+## Releases
+
+Published versions use GitHub Releases so HACS can offer normal updates. Maintainers should follow [RELEASING.md](RELEASING.md); the release workflow verifies version consistency and runs the frontend, HACS, and hassfest checks before publishing.
+
 ## HACS installation
 
 This repository is structured as a HACS **Integration** repository.

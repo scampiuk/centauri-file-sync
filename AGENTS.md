@@ -11,3 +11,11 @@ Before changing `custom_components/centauri_file_sync/frontend/`, read `docs/UI_
 - This panel ships as browser-ready JavaScript without a frontend build step. Do not add a bundler or assume that arbitrary lazy-loaded Home Assistant internals are registered unless the change deliberately introduces and documents that dependency.
 
 Use British English in user-facing text and documentation.
+
+## Releases
+
+Read `RELEASING.md` before preparing or publishing a release.
+
+- Keep the versions in `manifest.json`, `const.py`, the panel badge, and `CHANGELOG.md` identical.
+- Do not publish from an unvalidated commit or create release tags manually.
+- Publish releases with the **Release** GitHub Actions workflow so the tag is created only after frontend, HACS, and hassfest checks pass.
